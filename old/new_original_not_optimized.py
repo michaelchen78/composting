@@ -1,6 +1,4 @@
 import math
-from itertools import islice
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -115,7 +113,6 @@ class GoodCombination:
                  "Rating: " + str(self.rating) + "|\n"
         return string
 
-
 # Set up rating system
 aeration_weighting = 0.2
 biodegradability_weighting = 0.2
@@ -130,22 +127,20 @@ for material in MATERIALS:
 for idx, material in enumerate(MATERIALS):
     material.ideal_percentage = material_values[idx] / total_value
 
-combo_nums = iter(list(np.linspace(1, steps**num_materials, steps**num_materials))[:-1])
+
 # For graphing
 # The x-coordinate, the combination number
-x_combo_num = []
+combo_nums = list(np.linspace(1, steps**num_materials, steps**num_materials))[:-1]
 # The y-coordinate, the C:N ratio of the corresponding combination number (w/ same idx in `combo_nums`)
-y_c_n_ratios = []
+c_n_ratios = []
 
 # Initialize variables for search
 combo = [init_weight] * num_materials  # Initial combo
 combo[0] = init_weight-d_weight
 good_combos = []  # `combo`s which are within the defined range of C/N = 30. List of GoodCombinations
-big_o = 0
 
 # Search and fill `good_combos` with GoodCombinations
 for combo_num in combo_nums:
-    big_o += 1
     # Generate `combo` as a num_materials-long list of numbers, each number corresponding to the weight of the material
     # with the same index in the list `materials` as the aforementioned number's index in `combo`
     added_to_right_place = False
@@ -159,13 +154,6 @@ for combo_num in combo_nums:
         else:
             place += 1
     print(combo_num, " ", combo)
-    # [OPTIMIZATION]: check and set which places contain a minimum
-    at_minimum = [False] * num_materials
-    for idx, place_value in enumerate(combo):
-        if place_value == init_weight:
-            at_minimum[idx] = True
-    print(at_minimum)
-
     # Assign the materials their weights, according to the scheme in the last comment
     for idx, material in enumerate(MATERIALS):
         material.weight = combo[idx]
@@ -182,14 +170,11 @@ for combo_num in combo_nums:
     t_carbon = g_carbon + b_carbon  # Total carbon weight
     t_nitrogen = g_nitrogen + b_nitrogen  # Total nitrogen weight
     c_n_ratio = t_carbon / t_nitrogen  # Carbon:Nitrogen ratio
-    assert c_n_ratio > 0
     t_weight = b_total + g_total  # Total weight
     # For graphing
-    x_combo_num.append(combo_num)
-    y_c_n_ratios.append(t_carbon / t_nitrogen)
+    c_n_ratios.append(t_carbon / t_nitrogen)
 
-    # Check if the combination is a good combination, if so add it to `good_combos`
-    if 30 + UPPER_RANGE >= c_n_ratio >= 30 + LOWER_RANGE:
+    if 30 + UPPER_RANGE >= abs(t_carbon / t_nitrogen) >= 30 + LOWER_RANGE:
         # Determine the water that needs to be added for the combination
         t_water = g_water  # Total water weight
         for material in MATERIALS:
@@ -206,34 +191,16 @@ for combo_num in combo_nums:
             total_rating += rating
         good_combos.append(GoodCombination(c_n_ratio, tuple(combo), water_weight_needed, combo_num, total_rating))
 
-    # [OPTIMIZATION] implement optimization
-    if c_n_ratio > 30 + 2*UPPER_RANGE:
-        skip_place = 0
-        for switch in at_minimum:
-            if switch:
-                skip_place += 1
-            else:
-                break
-        to_skip = (((max_weight - combo[skip_place]) + 1) * (max_weight**skip_place)) - 1
-        next(islice(combo_nums, to_skip, to_skip), None)
-        if skip_place == num_materials - 1:
-            break
-        else:
-            combo[skip_place+1] += 1
-        for idx in range(skip_place, -1, -1):
-            combo[idx] = init_weight
-        combo[0] = init_weight - d_weight
 
 # Sort good_combos
 good_combos.sort(key=lambda o: o.rating, reverse=True)
 print(*good_combos)
-print("Times entered for loop (Big O): ", big_o)
 
 
 # PLOTTING
 figure = plt.figure()
-x1 = np.asarray(x_combo_num)
-y1 = np.asarray(y_c_n_ratios)
+x1 = np.asarray(combo_nums)
+y1 = np.asarray(c_n_ratios)
 plt.plot(x1, y1, label="line", color="red")
 x2 = [good_combo.combo_num for good_combo in good_combos]
 y2 = [good_combo.c_n_ratio for good_combo in good_combos]
