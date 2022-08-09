@@ -1,0 +1,5 @@
+name carbon_percent nitrogen_percent water_percent aeration biodegradability possessed
+leaves 0.40 0.005 0.38 2 2 3
+paper 0.38125 0.0025 0.19 1.5 4 10
+cardboard 0.563 0.001 0.08 5 5 7
+trimmings 0.53 0.01 0.15 4 3 7
