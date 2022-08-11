@@ -93,7 +93,7 @@ num_materials = len(MATERIALS)
 class GoodCombination:
     def __init__(self, c_n_ratio, weights, needed_water_weight, combo_num, rating):
         self.c_n_ratio = c_n_ratio
-        self.weights = weights  # Weights are based on the order of MATERIALS
+        self.weights = weights  # Weights are based on the order of materials
         self.needed_water_weight = needed_water_weight
         self.combo_num = combo_num
         self.rating = rating

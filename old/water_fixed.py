@@ -130,7 +130,7 @@ possessedValue = 0.6
 
 # so this little thing is just what you put the materials you want it to calculate in. you need to put it in the -
 # dictionary above before you put it in here though obv
-materials = [paper, leaves, cardboard]
+materials = [cardboard, paper, leaves]
 
 # ___________________________________________________
 

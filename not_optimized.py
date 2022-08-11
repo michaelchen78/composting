@@ -18,7 +18,7 @@ g_water = 8.35  # Green layer water weight
 
 UPPER_RANGE = 0.1
 LOWER_RANGE = -0.1
-max_weight = 100
+max_weight = 10
 d_weight = 1
 init_weight = 1
 
@@ -84,7 +84,7 @@ for material in all_materials:
     all_materials_dictionary[material.name] = material
 
 
-MATERIALS_STRINGS = ["paper", "leaves", "cardboard"]
+MATERIALS_STRINGS = ["cardboard", "paper", "leaves"]
 MATERIALS = [all_materials_dictionary[string_name] for string_name in MATERIALS_STRINGS]
 print("Used materials: \n", *MATERIALS)
 
@@ -95,7 +95,7 @@ num_materials = len(MATERIALS)
 class GoodCombination:
     def __init__(self, c_n_ratio, weights, needed_water_weight, combo_num, rating):
         self.c_n_ratio = c_n_ratio
-        self.weights = weights  # Weights are based on the order of MATERIALS
+        self.weights = weights  # Weights are based on the order of materials
         self.needed_water_weight = needed_water_weight
         self.combo_num = combo_num
         self.rating = rating
@@ -130,7 +130,7 @@ for material in MATERIALS:
 for idx, material in enumerate(MATERIALS):
     material.ideal_percentage = material_values[idx] / total_value
 
-combo_nums = iter(list(np.linspace(1, steps**num_materials, steps**num_materials))[:-1])
+combo_nums = iter(list(np.linspace(1, steps**num_materials, steps**num_materials)))
 # For graphing
 # The x-coordinate, the combination number
 x_combo_num = []
@@ -209,7 +209,7 @@ print("Times entered for loop (Big O): ", big_o)
 figure = plt.figure()
 x1 = np.asarray(x_combo_num)
 y1 = np.asarray(y_c_n_ratios)
-plt.plot(x1, y1, label="line", color="red")
+plt.plot(x1, y1, label="line", color="red", marker="o", linestyle="solid")
 x2 = [good_combo.combo_num for good_combo in good_combos]
 y2 = [good_combo.c_n_ratio for good_combo in good_combos]
 plt.plot(x2, y2, "o", label="hit", color="green")
