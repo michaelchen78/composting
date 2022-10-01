@@ -105,7 +105,7 @@ def no_optimized_search_function(combo, combo_nums, big_o, iterate_combo, max_we
 
         # Check if the combination is a good combination, if so add it to `good_combos`
         if 30 + upper_range >= c_n_ratio >= 30 + lower_range:
-            print("hit", combo_num)
+            # print("hit", combo_num)
             # Determine the water that needs to be added for the combination
             t_water = g_water  # Total water weight
             for material in materials:
@@ -171,7 +171,7 @@ def optimized_search_function(combo, combo_nums, big_o, iterate_combo, max_weigh
 
         # Check if the combination is a good combination, if so add it to `good_combos`
         if 30 + upper_range >= c_n_ratio >= 30 + lower_range:
-            print("hit", combo_num)
+            # print("hit", combo_num)
             # Determine the water that needs to be added for the combination
             t_water = g_water  # Total water weight
             for material in materials:
@@ -198,14 +198,17 @@ def optimized_search_function(combo, combo_nums, big_o, iterate_combo, max_weigh
                 else:
                     break
             to_skip = (((max_weight - combo[skip_place]) + 1) * (steps ** skip_place)) - 1
+            # Skips the nums (how the for loop is iterating)
             next(islice(combo_nums, to_skip, to_skip), None)
 
             # Cases in which the last place has been MAXED OUT
+            # This is simply in place to end the entire search in the case that the rest of the search is bad
             if skip_place == num_materials - 1 or (
                     skip_place == num_materials - 2 and combo[skip_place + 1] == max_weight):
                 break
             else:
                 iterate_combo(combo, skip_place + 1, max_weight, d_weight, init_weight)
+            # Makes combo into the iteration to be started on.
             for idx in range(skip_place, -1, -1):
                 combo[idx] = init_weight
             combo[0] = init_weight - d_weight
@@ -299,7 +302,7 @@ def search(all_materials_dictionary, g_carbon, g_nitrogen, g_total, g_water, upp
 
 # Plot the search
 def plot(x_combo_num1, y_c_n_ratios1, good_combos1, x_combo_num2, y_c_n_ratios2, good_combos2, upper_range,
-         lower_range):
+         lower_range, plot_figure):
     x1 = np.asarray(x_combo_num1)
     y1 = np.asarray(y_c_n_ratios1)
     x2 = [good_combo.combo_num for good_combo in good_combos1]
@@ -322,8 +325,12 @@ def plot(x_combo_num1, y_c_n_ratios1, good_combos1, x_combo_num2, y_c_n_ratios2,
     plt.ylabel("C:N Ratio")
     '''
 
-    # plot_figure_1(lower_range, upper_range, x1, x2, y1, y2)
-    plot_figure_2(lower_range, upper_range, x1, x2, y1, y2, a1, b1, a2, b2)
+    if plot_figure == 1:
+        plot_figure_1(lower_range, upper_range, x1, x2, y1, y2)
+    if plot_figure == 2:
+        plot_figure_2(lower_range, upper_range, x1, x2, y1, y2, a1, b1, a2, b2)
+    if plot_figure == 3:
+        plot_figure_3(lower_range, upper_range, x1, x2, y1, y2, a1, b1, a2, b2)
 
 
 def plot_figure_1(lower_range, upper_range, x1, x2, y1, y2):
@@ -349,7 +356,7 @@ def plot_figure_1(lower_range, upper_range, x1, x2, y1, y2):
     axins.set_ylim(sy1, sy2)
     # axins.set_xticklabels([])
     # axins.set_yticklabels([])
-    ax.indicate_inset_zoom(axins, edgecolor="black", label="Inset axes")
+    ax.indicate_inset_zoom(axins, edgecolor="black")  # , label="Inset axes")
     plt.legend(loc="upper left")
     plt.savefig("figures/figure1.png", bbox_inches="tight")
     plt.show()
@@ -371,7 +378,7 @@ def plot_figure_2(lower_range, upper_range, x1, x2, y1, y2, a1, b1, a2, b2):
     ax.tick_params(axis='y', labelsize=14)
 
     # inset axes....
-    axins = ax.inset_axes([0.2, 0.08, 0.6, 0.25])
+    axins = ax.inset_axes([0.15, 0.08, 0.3, 0.25])
     axins.plot(x1, y1, label="No optimization -- checked combinations", color="red", marker="o", linestyle="solid")
     axins.plot(x2, y2, "^", label="No optimization -- good combinations", color="green", markersize=12)
     axins.plot(a1, b1, label="With optimization -- checked combinations", color="blue", marker="o", linestyle="solid")
@@ -380,14 +387,69 @@ def plot_figure_2(lower_range, upper_range, x1, x2, y1, y2, a1, b1, a2, b2):
                        label="\'Good\' range")
 
     # sub region of the original image
-    sx1, sx2, sy1, sy2 = 195, 310, 19, 45
+    sx1, sx2, sy1, sy2 = 210, 310, 19, 45
     axins.set_xlim(sx1, sx2)
     axins.set_ylim(sy1, sy2)
     # axins.set_xticklabels([])
     # axins.set_yticklabels([])
-    ax.indicate_inset_zoom(axins, edgecolor="black", label="Inset axes")
+    ax.indicate_inset_zoom(axins, edgecolor="black", label="1s-place skip")
+
+    # inset axes....
+    axins2 = ax.inset_axes([0.65, 0.08, 0.3, 0.25])
+    axins2.plot(x1, y1, label="No optimization -- checked combinations", color="red", marker="o", linestyle="solid")
+    axins2.plot(x2, y2, "^", label="No optimization -- good combinations", color="green", markersize=12)
+    axins2.plot(a1, b1, label="With optimization -- checked combinations", color="blue", marker="o", linestyle="solid")
+    axins2.plot(a2, b2, "*", label="With optimization -- good combinations", color="darkorange")
+    axins2.fill_between(x1, [30 + upper_range] * len(x1), [30 + lower_range] * len(x1), color="purple", alpha=0.5,
+                       label="\'Good\' range")
+
+    # sub region of the original image
+    s2x1, s2x2, s2y1, s2y2 = 740, 840, 21, 47
+    axins2.set_xlim(s2x1, s2x2)
+    axins2.set_ylim(s2y1, s2y2)
+    # axins.set_xticklabels([])
+    # axins.set_yticklabels([])
+    ax.indicate_inset_zoom(axins2, ls="--", edgecolor="black", label="10s-place skip")
+
     plt.legend(loc="upper left")
     plt.savefig("figures/figure2.png", bbox_inches="tight")
+    plt.show()
+
+
+def plot_figure_3(lower_range, upper_range, x1, x2, y1, y2, a1, b1, a2, b2):
+    fig, ax = plt.subplots(figsize=[15, 10])
+    ax.plot(x1, y1, label="No optimization -- checked combinations", color="red", marker="o", linestyle="solid")
+    ax.plot(x2, y2, "^", label="No optimization -- good combinations", color="green", markersize=12)
+    ax.plot(a1, b1, label="With optimization -- checked combinations", color="blue", marker="o", linestyle="solid")
+    ax.plot(a2, b2, "*", label="With optimization -- good combinations", color="darkorange")
+    ax.fill_between(x1, [30 + upper_range] * len(x1), [30 + lower_range] * len(x1), color="purple", alpha=0.5,
+                    label="\'Good\' range")
+
+    ax.set_xlabel("Iteration number", fontsize=20)
+    ax.set_ylabel("C:N Ratio", fontsize=20)
+    ax.set_ylim(0, 56)
+    ax.tick_params(axis='x', labelsize=14)
+    ax.tick_params(axis='y', labelsize=14)
+
+    # inset axes....
+    axins = ax.inset_axes([0.1, 0.08, 0.8, 0.25])
+    axins.plot(x1, y1, label="No optimization -- checked combinations", color="red", marker="o", linestyle="solid")
+    axins.plot(x2, y2, "^", label="No optimization -- good combinations", color="green", markersize=12)
+    axins.plot(a1, b1, label="With optimization -- checked combinations", color="blue", marker="o", linestyle="solid")
+    axins.plot(a2, b2, "*", label="With optimization -- good combinations", color="darkorange")
+    axins.fill_between(x1, [30 + upper_range] * len(x1), [30 + lower_range] * len(x1), color="purple", alpha=0.5,
+                       label="\'Good\' range")
+
+    # sub region of the original image
+    sx1, sx2, sy1, sy2 = 7680, 8020, 24, 48
+    axins.set_xlim(sx1, sx2)
+    axins.set_ylim(sy1, sy2)
+    # axins.set_xticklabels([])
+    # axins.set_yticklabels([])
+    ax.indicate_inset_zoom(axins, edgecolor="black", label="100s-place skip")
+
+    plt.legend(loc="upper left")
+    plt.savefig("figures/figure3.png", bbox_inches="tight")
     plt.show()
 
 
@@ -410,7 +472,7 @@ def main():
     init_weight = 0
 
     # Materials used (strings)
-    materials_strings = ["cardboard", "paper", "leaves"]
+    materials_strings = ["trimmings", "cardboard", "paper", "leaves",]
 
     # Not optimized search
     good_combos1, big_o1, x_combo_num1, y_c_n_ratios1 = search(all_materials_dictionary, g_carbon, g_nitrogen, g_total,
@@ -431,7 +493,9 @@ def main():
     print(*good_combos2)
     print("Times entered for loop (Big O): ", big_o2)
 
-    plot(x_combo_num1, y_c_n_ratios1, good_combos1, x_combo_num2, y_c_n_ratios2, good_combos2, upper_range, lower_range)
+    plot_figure = 1
+    plot(x_combo_num1, y_c_n_ratios1, good_combos1, x_combo_num2, y_c_n_ratios2, good_combos2, upper_range, lower_range
+         , plot_figure)
 
 
 if __name__ == "__main__":
